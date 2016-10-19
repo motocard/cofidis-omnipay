@@ -1,0 +1,23 @@
+{
+    "name": "mendicm/cofidis-omnipay",
+    "description": "Cofidis gateway for the OmniPay PHP payment processing library.",
+    "require": {
+        "omnipay/common": "2.*"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "mendicm",
+            "email": "carlos.mendieta@sddbrandcare.com",
+            "homepage": "http://github.com/mendicm"
+        }
+    ],
+    "autoload": {
+        "psr-4": { "Omnipay\\Sermepa\\": "src/" }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "0.1.x-dev"
+        }
+    }
+}
