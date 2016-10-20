@@ -54,43 +54,55 @@ class PurchaseRequest extends AbstractRequest
         $this->setParameter('errorCallback', $errorCallback);
     }
 
+    public function setDocumentType($products)
+    {
+        $this->setParameter('documentType', $products);
+    }
+    public function setDocument($products)
+    {
+        $this->setParameter('document', $products);
+    }
+
     public function setProducts($products)
     {
         $this->setParameter('products', $products);
     }
 
+
     public function getData()
     {
         $data = [
-            'importe'     => (float)$this->getAmount(),
-            'precioTotal' => (float)$this->getAmount(),
-
-            'nombre'         => $this->getParameter('name'),
-            'apellidos '     => $this->getParameter('lastname'),
-            'cod_postal'     => $this->getParameter('postalCode'),
-            'email'          => $this->getParameter('email'),
-            'telefono'       => $this->getParameter('phone'),
+            'importe'        => (float)$this->getAmount(),
+            'precioTotal'    => (float)$this->getAmount(),
             'tipo_documento' => $this->getParameter('documentType'),
             'nif'            => $this->getParameter('document'),
-
-            'url_acept'  => $this->getParameter('returnUrl'),
-            'url_rechaz' => $this->getParameter('cancelUrl'),
-            'url_cancel' => $this->getParameter('cancelUrl'),
-
-            'url_confirm' => $this->getParameter('confirmCallback'),
-            'url_error'   => $this->getParameter('errorCallback'),
-
-            'referencia' => $this->getParameter('order'),
-            'vendedor'   => $this->getParameter('merchantCode'),
-            'producto'   => $this->getParameter('productCode'),
-            'carencia'   => $this->getParameter('deferral'),
-
+            'referencia'     => $this->getParameter('order'),
+            'vendedor'       => $this->getParameter('merchantCode'),
+            'producto'       => $this->getParameter('productCode'),
+            'carencia'       => $this->getParameter('deferral'),
+            'url_acept'      => $this->getParameter('returnUrl'),
+            'url_rechaz'     => $this->getParameter('cancelUrl'),
+            'url_cancel'     => $this->getParameter('cancelUrl'),
+            'url_confirm'    => $this->getParameter('confirmCallback'),
+            'url_error'      => $this->getParameter('errorCallback'),
         ];
 
+        $card = $this->getCard();
+
+        if ($card) {
+            $data['nombre']     = $card->getBillingFirstName();
+            $data['apellidos']  = $card->getBillingLastName();
+            $data['cod_postal'] = $card->getPostcode();
+            $data['email']      = $card->getEmail();
+            $data['telefono']   = $card->getPhone();
+            $data['via']        = $card->getAddress1();
+            $data['poblacion']  = $card->getCity();
+        }
+
         foreach ($this->getParameter('products') as $key => $product) {
-            $data['cantidadCompra' . $key] = round($product['quantity'], 2);
-            $data['precioCompra' . $key]   = $product['price'];
-            $data['descCompra' . $key]     = $product['description'];
+            $data['cantidadCompra' . ($key+1)] = round($product['quantity'], 2);
+            $data['precioCompra' . ($key+1)]   = $product['price'];
+            $data['descCompra' . ($key+1)]     = $product['description'];
         }
 
         return $data;
