@@ -1,62 +1,48 @@
 <?php
 
-namespace Omnipay\Sermepa\Message;
+namespace Omnipay\Cofidis\Message;
 
-use Omnipay\Sermepa\Encryptor\Encryptor;
 use Symfony\Component\HttpFoundation\Request;
-use Omnipay\Sermepa\Exception\BadSignatureException;
-use Omnipay\Sermepa\Exception\CallbackException;
 
 /**
- * Sermepa (Redsys)  Callback Response
+ * Cofidis Callback Response
+ *
+ * @author Carlos Mendieta <carlos.mendieta@sddbrandcare.com>
  */
 class CallbackResponse
 {
-
     private $request;
-    private $merchantKey;
 
-    public function __construct(Request $request, $merchantKey)
+    public function __construct(Request $request)
     {
         $this->request = $request;
-        $this->merchantKey = $merchantKey;
-        $this->error = '';
     }
 
     /**
-     * Check callback response from tpv
+     * Check callback response from cofidis
      *
      * @return boolean
-     * @throws BadSignatureException
-     * @throws CallbackException
      */
     public function isSuccessful()
     {
-        $rawParameters = $this->request->get('Ds_MerchantParameters');
-
-        $decodedParameters = json_decode(base64_decode(strtr($rawParameters, '-_', '+/')), true);
-
-        if (!$this->checkSignature(
-            $rawParameters,
-            $decodedParameters['Ds_Order'],
-            $this->request->get('Ds_Signature')
-        )
-        ) {
-            throw new BadSignatureException();
-        }
-
-        //check response, code "000" to "099" means success
-        if ((int)$decodedParameters['Ds_Response'] > 99) {
-            throw new CallbackException(null, (int)$decodedParameters['Ds_Response']);
-        }
-
-        return true;
+        return (bool)$this->request->get('accept');
     }
 
-    private function checkSignature($data, $orderId, $expectedSignature)
+    /**
+     * Get the response status as string
+     *
+     * @return bool|string
+     */
+    public function getResponseStatus()
     {
-        $key = Encryptor::encrypt_3DES($orderId, base64_decode($this->merchantKey));
-
-        return strtr(base64_encode(hash_hmac('sha256', $data, $key, true)), '+/', '-_') == $expectedSignature;
+        switch ($this->request->get('accept')) {
+            case '0':
+                return 'rejected';
+            case '1':
+                return 'accepted';
+            case '2':
+                return 'ASNEF_pending';
+        }
+        return 'unknown';
     }
 }
