@@ -1,5 +1,5 @@
 {
-    "name": "mendicm/cofidis-omnipay",
+    "name": "motocard/cofidis-omnipay",
     "description": "Cofidis gateway for the OmniPay PHP payment processing library.",
     "require": {
         "omnipay/common": "~3.0"
